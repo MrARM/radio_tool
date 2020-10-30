@@ -37,7 +37,7 @@ using namespace radio_tool::radio;
 struct DeviceMapper
 {
     std::function<bool(const std::string &)> SupportsDevice;
-    std::function<const RadioOperations *(const std::string &)> CreateOperations;
+    std::function<RadioOperations *(const std::string &)> CreateOperations;
 };
 
 const std::vector<DeviceMapper> Drivers = {

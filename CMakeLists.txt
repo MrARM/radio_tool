@@ -55,20 +55,26 @@ set(ALL_SRC
     src/serial_radio_factory.cpp
     src/tyt_radio.cpp
     src/tyt_device.cpp
+    src/tyt_sgl_device.cpp
     src/ymodem_device.cpp
     src/tyt_dfu.cpp
     src/tyt_fw.cpp
+    src/tyt_fw_sgl.cpp
     src/cs_fw.cpp
     src/ailunce_radio.cpp
     src/ailunce_fw.cpp
     src/fymodem.c
     src/rdt.cpp
+    src/hid.cpp
+    src/tyt_hid.cpp
+    src/tyt_sgl_radio.cpp
     "${CMAKE_CURRENT_BINARY_DIR}/src/version.cpp"
 )
 
 file(GLOB_RECURSE ALL_HEADERS include false "*.h*")
 
 add_library(radiotool ${ALL_SRC} ${ALL_HEADERS})
+target_link_libraries(radiotool pthread)
 target_include_directories(radiotool PUBLIC include)
 
 add_executable(radio_tool src/radio_tool.cpp)

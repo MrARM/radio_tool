@@ -114,19 +114,19 @@ auto TYTFW::Write(const std::string& file) -> void
 
 auto TYTFW::ToString() const -> std::string
 {
-	std::stringstream out;
-	out << "== TYT Firmware == " << std::endl
-		<< "Radio: " << firmware_model << " (" << radio_model << ")" << std::endl
-		<< "Size:  " << std::fixed << std::setprecision(2) << (data.size() / 1024.0) << " KiB" << std::endl
-		<< "Data Segments: " << std::endl;
-	auto n = 0;
-	for (const auto& m : memory_ranges)
-	{
-		out << "  " << n++ << ": Start=0x" << std::setfill('0') << std::setw(8) << std::hex << m.first
-			<< ", Length=0x" << std::setfill('0') << std::setw(8) << std::hex << m.second
-			<< std::endl;
-	}
-	return out.str();
+    std::stringstream out;
+    out << "== TYT Firmware == " << std::endl
+        << "Radio: " << firmware_model << " (" << radio_model << ")" << std::endl
+        << "Size:  " << FormatBytes(data.size()) << std::endl
+        << "Data Segments: " << std::endl;
+    auto n = 0;
+    for (const auto &m : memory_ranges)
+    {
+        out << "  " << n++ << ": Start=0x" << std::setfill('0') << std::setw(8) << std::hex << m.first
+            << ", Length=0x" << std::setfill('0') << std::setw(8) << std::hex << m.second
+            << std::endl;
+    }
+    return out.str();
 }
 
 auto TYTFW::ReadHeader(std::ifstream& i) -> TYTFirmwareHeader

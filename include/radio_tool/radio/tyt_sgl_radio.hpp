@@ -1,7 +1,6 @@
 /**
  * This file is part of radio_tool.
- * Copyright (c) 2022 Niccol� Izzo IU2KIN
- * Copyright (c) 2022 v0l <radio_tool@v0l.io>
+ * Copyright (c) 2021 Kieran Harkin <kieran+git@harkin.me>
  * 
  * radio_tool is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,39 +18,35 @@
 #pragma once
 
 #include <radio_tool/radio/radio.hpp>
-#include <radio_tool/device/ymodem_device.hpp>
+#include <radio_tool/device/tyt_sgl_device.hpp>
 
-#include <libusb-1.0/libusb.h>
+#include <functional>
 
 namespace radio_tool::radio
 {
-    class AilunceRadio : public RadioOperations
+    class TYTSGLRadio : public RadioOperations
     {
     public:
-        // Prolific Technology, Inc. - USB-Serial Controller
-        static const auto VID = 0x067b;
-        static const auto PID = 0x2303;
-
-        AilunceRadio(const std::string &prt, const std::string &fname)
-            : device(prt, fname) {}
+        TYTSGLRadio(libusb_device_handle *h);
 
         auto WriteFirmware(const std::string &file) -> void override;
         auto ToString() const -> const std::string override;
+        auto GetDevice() const -> const device::RadioDevice * override;
 
-        auto GetDevice() const -> const device::RadioDevice* override
+        static auto SupportsDevice(const libusb_device_descriptor &dev) -> bool
         {
-            return &device;
+            if (dev.idVendor == hid::TYTHID::VID && dev.idProduct == hid::TYTHID::PID)
+            {
+                return true;
+            }
+            return false;
         }
 
-        static auto SupportsDevice(const std::string &) -> bool;
-
-        static auto Create(const std::string &port) -> AilunceRadio*
+        static auto Create(libusb_device_handle *h) -> TYTSGLRadio *
         {
-            return new AilunceRadio(port, "firmware.bin");
+            return new TYTSGLRadio(h);
         }
-
     private:
-        device::YModemDevice device;
-        static auto GetComPortUSBIds(const std::string& port) -> std::pair<uint16_t, uint16_t>;
+        device::TYTSGLDevice device;
     };
 } // namespace radio_tool::radio

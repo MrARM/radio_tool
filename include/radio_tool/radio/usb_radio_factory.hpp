@@ -23,6 +23,7 @@
 #include <vector>
 #include <memory>
 #include <functional>
+#include <thread>
 
 #include <libusb-1.0/libusb.h>
 
@@ -55,7 +56,7 @@ namespace radio_tool::radio
 			return os.str();
 		}
 
-		auto OpenDevice() const -> const RadioOperations * override
+		auto OpenDevice() const -> RadioOperations * override
 		{
 			return loader();
 		}
@@ -74,12 +75,13 @@ namespace radio_tool::radio
 		USBRadioFactory();
 		~USBRadioFactory();
 		auto ListDevices(const uint16_t &idx_offset) const -> const std::vector<RadioInfo *> override;
-
+		auto HandleEvents() -> void;
 	private:
 		auto GetDeviceString(const uint8_t &, libusb_device_handle *) const -> std::wstring;
 		static auto OpenDevice(const uint8_t &bus, const uint8_t &port) -> libusb_device_handle *;
 		static auto CreateContext() -> libusb_context*;
 		
 		libusb_context *usb_ctx;
+		std::thread events;
 	};
 }

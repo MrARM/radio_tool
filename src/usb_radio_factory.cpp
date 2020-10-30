@@ -19,6 +19,7 @@
 #include <radio_tool/radio/usb_radio_factory.hpp>
 #include <radio_tool/device/device.hpp>
 #include <radio_tool/radio/tyt_radio.hpp>
+#include <radio_tool/radio/tyt_sgl_radio.hpp>
 
 #include <libusb-1.0/libusb.h>
 
@@ -27,13 +28,14 @@
 #include <codecvt>
 #include <cstring>
 #include <iostream>
+#include <thread>
 
 using namespace radio_tool::radio;
 
 struct DeviceMapper
 {
     std::function<bool(const libusb_device_descriptor &)> SupportsDevice;
-    std::function<const RadioOperations *(libusb_device_handle *)> CreateOperations;
+    std::function<RadioOperations *(libusb_device_handle *)> CreateOperations;
 };
 
 /**
@@ -41,11 +43,13 @@ struct DeviceMapper
  */
 const std::vector<DeviceMapper> RadioSupports = {
     {TYTRadio::SupportsDevice, TYTRadio::Create},
+    {TYTSGLRadio::SupportsDevice, TYTSGLRadio::Create},
 };
 
 USBRadioFactory::USBRadioFactory() : usb_ctx(nullptr)
 {
     usb_ctx = CreateContext();
+    events = std::thread(&USBRadioFactory::HandleEvents, this);
 }
 
 USBRadioFactory::~USBRadioFactory()
@@ -192,4 +196,23 @@ auto USBRadioFactory::CreateContext() -> libusb_context *
 #endif
 
     return usb_ctx;
+}
+
+auto USBRadioFactory::HandleEvents() -> void
+{
+    std::cerr << "Events tread started: #" << std::this_thread::get_id() << std::endl;
+    while (usb_ctx != nullptr)
+    {
+        auto err = libusb_handle_events(usb_ctx);
+        if (err != LIBUSB_SUCCESS)
+        {
+            if (err != LIBUSB_ERROR_BUSY &&
+                err != LIBUSB_ERROR_TIMEOUT &&
+                err != LIBUSB_ERROR_OVERFLOW &&
+                err != LIBUSB_ERROR_INTERRUPTED)
+            {
+                break;
+            }
+        }
+    }
 }

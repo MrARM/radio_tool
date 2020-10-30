@@ -31,7 +31,7 @@ namespace radio_tool::radio
         TYTRadio(libusb_device_handle* h)
             : device(h) {}
 
-        auto WriteFirmware(const std::string &file) const -> void override;
+        auto WriteFirmware(const std::string &file) -> void override;
         auto ToString() const -> const std::string override;
 
         static auto SupportsDevice(const libusb_device_descriptor &dev) -> bool
@@ -47,7 +47,7 @@ namespace radio_tool::radio
             return &device;
         }
 
-        static auto Create(libusb_device_handle* h) -> const TYTRadio* {
+        static auto Create(libusb_device_handle* h) -> TYTRadio* {
             return new TYTRadio(h);
         }
     private:

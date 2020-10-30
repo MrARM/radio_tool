@@ -43,7 +43,7 @@ auto TYTRadio::ToString() const -> const std::string
 	return out.str();
 }
 
-auto TYTRadio::WriteFirmware(const std::string& file) const -> void
+auto TYTRadio::WriteFirmware(const std::string& file) -> void
 {
 	constexpr auto TransferSize = 1024u;
 
@@ -54,16 +54,18 @@ auto TYTRadio::WriteFirmware(const std::string& file) const -> void
 	dfu.SendTYTCommand(dfu::TYTCommand::FirmwareUpgrade);
 	for (auto& r : fw.GetDataSegments())
 	{
-		flash::FlashUtil::AlignedContiguousMemoryOp(flash::STM32F40X, r.address, r.address + r.size, [&dfu](const uint32_t& addr, const uint32_t& size, const flash::FlashSector& sector) {
+		flash::FlashUtil::AlignedContiguousMemoryOp(flash::STM32F40X, r.address, r.address + r.size, 
+		[&dfu](const uint32_t& addr, const uint32_t& size, const flash::FlashSector& sector) {
 			std::cerr << "Erasing: 0x" << std::setw(8) << std::setfill('0') << std::hex << addr
 				<< " [Size=0x" << std::hex << size << "]" << std::endl
 				<< "-- " << sector.ToString() << std::endl;
 
 			dfu.Erase(addr);
-			});
+		});
 
 		auto b_offset = 0u;
-		flash::FlashUtil::AlignedContiguousMemoryOp(flash::STM32F40X, r.address, r.address + r.size, [&dfu, &r, &TransferSize, &b_offset](const uint32_t& addr, const uint32_t& size, const flash::FlashSector& sector) {
+		flash::FlashUtil::AlignedContiguousMemoryOp(flash::STM32F40X, r.address, r.address + r.size, 
+		[&dfu, &r, &TransferSize, &b_offset](const uint32_t& addr, const uint32_t& size, const flash::FlashSector&) {
 			const auto& binary_data = r.data;
 			const auto blocks = (int)ceil(size / (double)TransferSize);
 
@@ -85,6 +87,6 @@ auto TYTRadio::WriteFirmware(const std::string& file) const -> void
 				dfu.Download(to_write, 2 + wValue);
 			}
 			b_offset += size;
-			});
+		});
 	}
 }
