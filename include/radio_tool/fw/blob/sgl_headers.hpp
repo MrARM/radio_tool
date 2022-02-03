@@ -1,6 +1,6 @@
 /**
  * This file is part of radio_tool.
- * Copyright (c) 2020 Kieran Harkin <kieran+git@harkin.me>
+ * Copyright (c) 2020 v0l <radio_tool@v0l.io>
  * https://github.com/rogerclarkmelbourne/OpenGD77/blob/master/tools/bin2sgl/bin2sgl/bin2sgl.c
  *     Modified version by Roger VK3KYY
  *     Ported to C by Daniel F1RMB
