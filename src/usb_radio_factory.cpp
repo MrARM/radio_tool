@@ -54,8 +54,11 @@ USBRadioFactory::USBRadioFactory() : usb_ctx(nullptr)
 
 USBRadioFactory::~USBRadioFactory()
 {
-    libusb_exit(usb_ctx);
+    auto ctx = usb_ctx;
     usb_ctx = nullptr;
+    events.join();
+
+    libusb_exit(ctx);
 }
 
 auto USBRadioFactory::ListDevices(const uint16_t &idx_offset) const -> const std::vector<RadioInfo *>
@@ -203,7 +206,8 @@ auto USBRadioFactory::HandleEvents() -> void
     std::cerr << "Events tread started: #" << std::this_thread::get_id() << std::endl;
     while (usb_ctx != nullptr)
     {
-        auto err = libusb_handle_events(usb_ctx);
+        timeval timeout = {0, 100};
+        auto err = libusb_handle_events_timeout(usb_ctx, &timeout);
         if (err != LIBUSB_SUCCESS)
         {
             if (err != LIBUSB_ERROR_BUSY &&
